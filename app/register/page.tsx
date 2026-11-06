@@ -105,7 +105,7 @@ export default function RegisterPage() {
         <CardHeader>
           <h1 className="text-2xl font-bold">Register</h1>
           <p className="text-muted-foreground">
-            Create your SpendWise account.
+            Create your ShelfLife account.
           </p>
         </CardHeader>
 

@@ -55,7 +55,7 @@ export default function LoginPage() {
       }
 
       // replace giúp nút Back không quay lại form Login vừa gửi.
-      router.replace("/expenses");
+      router.replace("/books");
     } catch (error) {
       setAuthError(
         error instanceof Error
@@ -73,7 +73,7 @@ export default function LoginPage() {
         <CardHeader>
           <h1 className="text-2xl font-bold">Login</h1>
           <p className="text-muted-foreground">
-            Sign in to your SpendWise account.
+            Sign in to your ShelfLife account.
           </p>
         </CardHeader>
         <CardContent>

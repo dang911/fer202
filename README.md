@@ -1,76 +1,70 @@
-﻿# SpendWise
+﻿# ShelfLife
 
-Ứng dụng quản lý chi tiêu cá nhân cho FER202, dùng Next.js App Router, TypeScript, Tailwind CSS, ShadCN UI và Supabase. Phiên đăng nhập, chi tiêu, bộ lọc và thống kê được quản lý bằng React Context.
+Ứng dụng quản lý sách theo đề FER202 PE1 FALL 2026: Next.js App Router, TypeScript, Tailwind CSS, ShadCN UI và Supabase. React Context quản lý phiên đăng nhập, sách, bộ lọc, tìm kiếm và thống kê.
 
-## Chạy trên máy
+## Chạy dự án
 
-Môi trường đã kiểm tra: Node.js 24.
-
-1. Chạy `npm install`.
-2. Sao chép `.env.example` thành `.env.local`.
-3. Điền hai giá trị lấy từ đúng project Supabase:
+1. Dùng Node.js 24. Chạy `npm install` nếu chưa có thư viện.
+2. Giữ `.env.local` hiện có hoặc sao chép `.env.example` thành `.env.local`. Chỉ cần hai biến:
 
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
 ```
 
-URL phải là URL gốc của project, không thêm `/rest/v1/` hoặc `/auth/v1/`. Giữ key thật trong `.env.local`, không đưa vào GitHub hoặc file zip.
+3. Trong SQL Editor của đúng project Supabase, chạy toàn bộ `supabase/books.sql`. File tạo bảng books, constraints, index, RLS và policies. Có thể chạy lại trên bảng do file này tạo mà không xóa dữ liệu. File không xóa bảng expenses cũ. Không dùng service_role/secret key trong ứng dụng.
+4. Tắt Confirm email trong cấu hình Email của Supabase Auth để đăng ký dùng được ngay và email trùng trả lỗi.
+5. Chạy `npm run dev`, mở địa chỉ Local trong terminal. Khởi động lại server sau khi thay đổi biến môi trường.
 
-4. Trong Supabase, chạy `supabase/expenses.sql` cho project chưa có bảng và policies. File hiện dành cho lần thiết lập đầu tiên; không chạy lại các lệnh CREATE POLICY nếu chúng đã tồn tại.
-5. Tắt Confirm email theo yêu cầu đề thi để tài khoản mới dùng được ngay.
-6. Chạy `npm run dev` rồi mở địa chỉ Local hiện trong terminal.
+## Chức năng
 
-Khi đổi biến môi trường, khởi động lại dev server.
+- `/`: trang chủ ShelfLife, ba feature cards, header thay đổi theo phiên đăng nhập.
+- `/register`: đăng ký thật, xác thực email/password/confirm password, thông báo đúng đề.
+- `/login`: đăng nhập thật, chuyển tới `/books`.
+- `/books`: bảo vệ theo phiên, thêm/xóa sách, chuyển To Read → Reading → Finished, lọc trạng thái và tìm theo title/author. Thống kê tính trên kết quả đang hiển thị.
 
-## Các trang
+Sách được tải khi xác định người dùng và giữ trong Context qua các lần chuyển trang; token refresh không tải lại sách. Đăng xuất hoặc đổi tài khoản xóa dữ liệu và bộ lọc cũ. RLS chỉ cho phép người đã đăng nhập đọc/thêm/xóa sách của mình và cập nhật cột status của sách của mình. Cột pages dùng NUMERIC không scale cùng CHECK để từ chối số lẻ gửi thẳng qua API thay vì làm tròn.
 
-- `/`: giới thiệu SpendWise và ba tính năng, có header thay đổi theo tài khoản.
-- `/register`: đăng ký Supabase, kiểm tra email và hai mật khẩu.
-- `/login`: đăng nhập Supabase, thành công chuyển tới `/expenses`.
-- `/expenses`: chỉ hiện sau khi xác định đã đăng nhập; thêm, xóa, lọc theo tháng và danh mục, xem tổng tiền và thống kê.
+## Kiểm tra
 
-Mỗi tài khoản chỉ được thao tác dữ liệu của chính mình theo RLS. Context được xóa khi đăng xuất hoặc đổi tài khoản. Các thông báo và `data-testid` bám theo đề thi.
-
-## Kiểm tra trước khi triển khai
-
-```bash
+```powershell
 npm run lint
 npm test
 npm run build
 ```
 
-Để chạy bản production trên máy sau khi build: `npm start`.
+Kiểm tra trên trình duyệt với Supabase đã thiết lập:
 
-Kiểm tra thủ công trên trình duyệt:
+- Đăng ký tài khoản mới, email trùng; đăng nhập đúng/sai mật khẩu.
+- Khi đăng xuất, `/books` chuyển về `/login`, không chớp nội dung riêng tư.
+- Gửi form sách trống: bốn lỗi đúng đề; sửa hợp lệ thì lỗi biến mất.
+- Thử giới hạn 80 ký tự cho title, 60 cho author, pages nguyên trong 1–5000.
+- Thêm sách: hiện đầu danh sách, form xóa trắng, Book added; tải lại vẫn còn.
+- Advance hai lần, nút biến mất ở Finished; tải lại vẫn đúng trạng thái.
+- Kết hợp search với status, thử không có kết quả, Clear và kiểm tra summary.
+- Xóa sách và tải lại. Đổi tài khoản để kiểm tra không lộ dữ liệu người trước.
+- Kiểm tra độ rộng 375 px và 1280 px.
+- Gọi API bằng anon và hai tài khoản để kiểm tra RLS, user_id giả và dữ liệu không hợp lệ.
 
-- Đăng ký email mới, thử lại email trùng, đăng nhập đúng và sai mật khẩu.
-- Truy cập `/expenses` khi đăng xuất: phải chuyển về `/login`.
-- Để trống form: lỗi chỉ hiện sau khi gửi. Ghi chú trống là hợp lệ; ghi chú trên 100 ký tự phải bị từ chối.
-- Thêm chi tiêu và tải lại trang: dữ liệu vẫn còn. Xóa rồi tải lại: dữ liệu đã mất.
-- Thêm các khoản ở hai danh mục và hai tháng. Kiểm tra bộ lọc kết hợp, tổng tiền, số khoản và thứ tự thống kê; Clear đặt lại cả hai bộ lọc.
-- Đăng xuất, đăng nhập tài khoản khác: không nhìn thấy dữ liệu tài khoản trước.
-- Ở chiều rộng 375 px, kiểm tra form và danh sách không tràn ngang. Ở 1280 px, form và thống kê nằm cạnh danh sách.
+## Giữ link hiện tại
 
-## Triển khai Vercel
+Giữ repository GitHub và project Vercel đang liên kết. Đưa code mới lên nhánh Production đang cấu hình để cập nhật domain Production hiện tại. Giữ hai biến môi trường Supabase trên Vercel rồi redeploy; tắt Vercel Authentication để giảng viên truy cập được. Việc sửa code local không tự cập nhật database hoặc website đã deploy.
 
-1. Đưa code đã kiểm tra lên repository GitHub public.
-2. Trên Vercel, tạo project mới và import repository. Chọn framework Next.js, Root Directory là thư mục chứa `package.json`.
-3. Thêm `NEXT_PUBLIC_SUPABASE_URL` và `NEXT_PUBLIC_SUPABASE_ANON_KEY` với giá trị thật từ `.env.local`, áp dụng cho Production. Khi dùng Preview cũng cần cấu hình cho môi trường đó.
-4. Deploy và kiểm tra production domain dạng `https://<project>.vercel.app`.
-5. Theo yêu cầu đề thi, tắt Vercel Authentication của project tại phần Deployment Protection để giảng viên mở trang mà không cần tài khoản Vercel.
-6. Sau khi đổi biến môi trường, triển khai lại; thay đổi chỉ áp dụng cho deployment mới.
-7. Dùng tài khoản chấm bài đăng nhập trên production và thử thêm/xóa một khoản chi.
+## Bài nộp
 
-Tài liệu: https://vercel.com/docs/frameworks/full-stack/nextjs
-Biến môi trường: https://vercel.com/docs/environment-variables
-Deployment Protection: https://vercel.com/docs/deployment-protection/methods-to-protect-deployments/vercel-authentication
+Tạo một thư mục chứa `<MA_SINH_VIEN>.docx` và `<MA_SINH_VIEN>.zip`. Dùng thông tin thật của mình, không dùng tên và mã ví dụ trong đề.
 
-## Chuẩn bị bài nộp
+Nội dung Word theo mẫu của đề, các URL hiển thị nguyên dạng có https://:
 
-Hai file phải có cùng mã sinh viên và nằm trong một thư mục:
+```text
+Student Code: <MA_SINH_VIEN>
+Full Name: <HO_TEN>
+GitHub Repository URL: https://github.com/<username>/<repository>
+Vercel Production URL: https://<project>.vercel.app
+Supabase Project URL: https://<project>.supabase.co
+Supabase anon (public) key: <ANON_PUBLIC_KEY>
+Test account email: <EMAIL_TAI_KHOAN_CHAM_BAI>
+Test account password: <MAT_KHAU_TAI_KHOAN_CHAM_BAI>
+```
 
-- `<MA_SINH_VIEN>.docx`: điền đúng mẫu ở đề, gồm họ tên, mã sinh viên, GitHub URL, Vercel production URL, Supabase project URL, anon public key và tài khoản chấm bài.
-- `<MA_SINH_VIEN>.zip`: `package.json` nằm ngay cấp đầu của zip; kèm lock file, `app/`, `components/`, `lib/`, `public/`, `components.json`, `supabase/expenses.sql`, `.env.example` và các file cấu hình cần thiết.
-
-Không đưa `node_modules`, `.next`, `.git`, `.env.local` hoặc file `.env` có giá trị thật vào zip. Không dùng service_role/secret key trong ứng dụng hoặc bài nộp. Code trên GitHub phải khớp code trong zip.
+Tạo sẵn tài khoản chấm bài và đăng nhập thử trên Production. Repository phải public và khớp code trong zip. Đặt package.json ngay gốc zip, kèm lock file, app/, components/, lib/, public/, components.json, supabase/books.sql, .env.example và các file cấu hình. Không đưa node_modules, .next, .git, file cache hoặc bất kỳ file env chứa giá trị thật nào vào zip. .env.example chỉ liệt kê hai tên biến với giá trị trống.

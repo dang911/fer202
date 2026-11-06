@@ -2,13 +2,13 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { Wallet } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { useSpendWise } from "@/components/providers/spendwise-provider";
+import { useShelfLife } from "@/components/providers/shelflife-provider";
 import { supabase } from "@/lib/supabase";
 
 export function SiteHeader() {
-  const { session } = useSpendWise();
+  const { session } = useShelfLife();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [authError, setAuthError] = useState("");
   const loggingOut = useRef(false);
@@ -22,7 +22,7 @@ export function SiteHeader() {
       const { error } = await supabase.auth.signOut({ scope: "local" });
       if (error) setAuthError(error.message);
       // Context nhận SIGNED_OUT và xóa dữ liệu; header tự trở về Login/Register.
-      // Trang /expenses tự chuyển về /login, còn người ở trang chủ vẫn ở đó.
+      // Trang /books tự chuyển về /login, còn người ở trang chủ vẫn ở đó.
     } catch (error) {
       setAuthError(
         error instanceof Error ? error.message : "Unable to log out. Please try again.",
@@ -38,9 +38,9 @@ export function SiteHeader() {
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
           <span className="flex size-9 items-center justify-center rounded-xl bg-emerald-700 text-white">
-            <Wallet className="size-5" aria-hidden="true" />
+            <BookOpen className="size-5" aria-hidden="true" />
           </span>
-          SpendWise
+          ShelfLife
         </Link>
         {/* Chờ xác định phiên để không hiện nhầm trạng thái đăng xuất lúc tải trang. */}
         {session === undefined ? (
@@ -50,8 +50,8 @@ export function SiteHeader() {
             <span data-testid="user-email" className="min-w-0 break-all text-sm text-muted-foreground">
               {session.user.email}
             </span>
-            <Link href="/expenses" data-testid="link-expenses" className={buttonVariants({ variant: "outline" })}>
-              Expenses
+            <Link href="/books" data-testid="link-books" className={buttonVariants({ variant: "outline" })}>
+              Books
             </Link>
             <Button type="button" data-testid="btn-logout" onClick={handleLogout}
               disabled={isLoggingOut} aria-busy={isLoggingOut}>

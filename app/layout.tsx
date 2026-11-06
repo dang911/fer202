@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { SpendWiseProvider } from "@/components/providers/spendwise-provider";
+import { ShelfLifeProvider } from "@/components/providers/shelflife-provider";
 import { SiteHeader } from "@/components/site-header";
 
 const geistSans = Geist({
@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SpendWise",
-  description: "Track your expenses, filter by month and category, and see where your money goes.",
+  title: "ShelfLife",
+  description: "Keep your reading list, track your progress, and search your personal bookshelf.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -27,11 +27,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         {/* Context tồn tại khi chuyển trang; mọi component đọc cùng một nguồn dữ liệu. */}
-        <SpendWiseProvider>
+        <ShelfLifeProvider>
           {/* Header dùng chung trên mọi trang, đọc phiên đăng nhập từ Context. */}
           <SiteHeader />
           {children}
-        </SpendWiseProvider>
+        </ShelfLifeProvider>
       </body>
     </html>
   );
